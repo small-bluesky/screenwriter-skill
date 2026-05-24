@@ -1,12 +1,28 @@
 name: screenwriter
-version: 1.0.0
+version: 1.1.0
 description: 将用户的一句话创意扩展为标准格式的电影剧本第一幕，包含故事前提、人物小传、分场大纲、完整剧本及编剧注。
 author: screenwriter-skill
 tags: [writing, screenplay, creative, prompt-only]
 language: zh-CN
 model_preference:
-  provider: openai
-  models: [gpt-4o, claude-3.5-sonnet]
+  primary:
+    provider: siliconflow
+    model: deepseek-ai/DeepSeek-V3
+    api_base: https://api.siliconflow.cn/v1
+    reason: "性价比最高，中文叙事能力强，API 国内直连无需代理，新用户赠送额度"
+  alternatives:
+    - provider: qianwen
+      model: qwen3.6-plus
+      api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+      reason: "千问云旗舰模型，统一多模态，1M上下文，适合长篇剧本创作"
+    - provider: deepseek
+      model: deepseek-chat
+      api_base: https://api.deepseek.com/v1
+      reason: "DeepSeek官方直连，中文写作质量高，价格低廉"
+    - provider: openai
+      model: gpt-4o
+      api_base: https://api.openai.com/v1
+      reason: "结构化输出最可靠，适合预算充足的生产环境"
 
 input:
   variable: user_idea
