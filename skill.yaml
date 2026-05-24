@@ -58,6 +58,9 @@ system_prompt: |
   ### 【编剧注】
   用要点形式给出2-3条关于节奏、反转设计或对白风格的自我点评，并提供一个可能的故事备选走向。
 
+  ## 背景知识（由 RAG 系统注入，若无注入则忽略此段）
+  {{rag_context}}
+
   ## 用户输入
   用户的一句话创意：
   {{user_idea}}
@@ -69,6 +72,44 @@ runtime:
   max_tokens: 4000
   stream: false
 
+rag_config:
+  enabled: false
+  injection_position: before_user_idea
+  injection_format: |
+    以下是与用户创意相关的背景知识，你必须严格基于这些信息创作，不得编造与以下内容矛盾的事实细节。你可以在创作中自然引用这些知识，但不需要逐条复述：
+    ---
+    {chunks}
+    ---
+  max_chunks: 5
+  chunk_max_tokens: 500
+  query_generation:
+    method: llm_extract
+    prompt: |
+      从以下故事创意中提取2-3个检索关键词，用于在文化知识库中查找相关背景资料。
+      关键词应侧重：地域文化、时代背景、职业特征、民俗传统、历史事件。
+      只输出关键词，用逗号分隔，不要解释。
+      故事创意：{user_idea}
+    fallback_keywords: []
+  query_templates:
+    - focus: 地域文化
+      template: "{关键词} 文化传统 民俗 生活方式"
+    - focus: 时代背景
+      template: "{关键词} 历史背景 社会风貌 年代特征"
+    - focus: 职业特征
+      template: "{关键词} 职业日常 行业术语 工作场景"
+  knowledge_base:
+    type: vector
+    embedding_model: text-embedding-3-small
+    connector: langchain
+    collection: culture_knowledge_base
+    similarity_threshold: 0.7
+  output_compatibility:
+    chunk_format: "【{source}】{content}"
+    deduplicate: true
+    max_total_tokens: 2500
+
 extensions:
   rag_support: true
+  rag_version: "1.1"
+  rag_description: "支持 RAG 知识注入。启用后，系统在调用 LLM 前自动检索知识库，将相关文化、历史、职业等背景知识注入 system_prompt，压制模型幻觉，提升创作细节的真实性"
   tool_use: false
